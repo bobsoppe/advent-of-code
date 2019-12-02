@@ -20,21 +20,20 @@
       1 (recur (assoc program target (+ i j)) (+ position 4))
       2 (recur (assoc program target (* i j)) (+ position 4)))))
 
+(defn run [noun verb]
+  (-> input
+      (assoc 1 noun)
+      (assoc 2 verb)
+      (run-program 0)
+      (get 0)))
+
 (println "Solution part 1\n"
-         (-> input
-             (assoc 1 12)
-             (assoc 2 2)
-             (run-program 0)
-             (get 0)))
+         (run 12 2))
 
 (println "Solution part 2\n"
          (filter some? (for [noun (range (count input))
                              verb (range (count input))]
-                         (try (if (= 19690720 (-> input
-                                                  (assoc 1 noun)
-                                                  (assoc 2 verb)
-                                                  (run-program 0)
-                                                  (get 0)))
+                         (try (if (= 19690720 (run noun verb))
                                 (+ (* 100 noun) verb)
                                 nil)
                               (catch Exception e
