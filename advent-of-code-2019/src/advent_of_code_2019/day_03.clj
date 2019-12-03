@@ -4,11 +4,10 @@
             [clojure.edn :as edn]))
 
 (def input
-  (-> "advent_of_code_2019/day_03.txt"
-      io/resource io/file slurp
-      (str/split-lines)
-      (->>
-        (map #(str/split % #",")))))
+  (->> "advent_of_code_2019/day_03.txt"
+       io/resource io/file slurp
+       (str/split-lines)
+       (map #(str/split % #","))))
 
 (defn calculate-steps [[x y] direction distance]
   (map (fn [step]
@@ -19,21 +18,25 @@
            "L" [(- x step) y]))
        (range 1 (+ 1 distance))))
 
+(defn calculate-vector-from-step [[direction & distance]]
+  [(str direction) (read-string (apply str distance))])
+
+(defn calculate-path-from-step [coordinates [direction distance]]
+  (let [last-coordinate (last coordinates)]
+    (->>
+      (calculate-steps last-coordinate direction distance)
+      (concat coordinates)
+      (vec))))
+
 (defn calculate-coordinates [line]
-  (reduce (fn [coordinates next-step]
-            (vec
-              (concat coordinates
-                      (calculate-steps
-                        (last coordinates)
-                        (first next-step)
-                        (last next-step)))))
-          [[0 0]]
-          (map (fn [[direction & distance]] [(str direction) (read-string (apply str distance))]) line)))
+  (->> line
+       (map calculate-vector-from-step)
+       (reduce calculate-path-from-step [[0 0]])))
 
 (defn calculate-intersections [line-1 line-2]
   (let [line-2 (set line-2)]
     (->> (filter (fn [point] (contains? line-2 point)) line-1)
-        (drop 1))))
+         (drop 1))))
 
 (defn calculate-manhattan-distance [[x y]]
   (+ (Math/abs x) (Math/abs y)))
